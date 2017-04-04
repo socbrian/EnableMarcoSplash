@@ -1,0 +1,79 @@
+Option Explicit 
+ 
+Private Sub Workbook_Open() 
+     
+    With Application 
+         'disable the ESC key
+        .EnableCancelKey = xlDisabled 
+        .ScreenUpdating = False 
+         
+        Call UnhideSheets 
+         
+        .ScreenUpdating = True 
+         're-enable ESC key
+        .EnableCancelKey = xlInterrupt 
+    End With 
+     
+End Sub 
+ '
+Private Sub UnhideSheets() 
+     '
+    Dim Sheet As Object 
+     '
+    For Each Sheet In Sheets 
+        If Not Sheet.Name = "Prompt" Then 
+            Sheet.Visible = xlSheetVisible 
+        End If 
+    Next 
+     '
+    Sheets("Prompt").Visible = xlSheetVeryHidden 
+     '
+    Application.Goto Worksheets(1).[A1], True '< Optional
+     '
+    Set Sheet = Nothing 
+    ActiveWorkbook.Saved = True 
+     
+End Sub 
+ 
+Private Sub Workbook_BeforeClose(Cancel As Boolean) 
+    With Application 
+        .EnableCancelKey = xlDisabled 
+        .ScreenUpdating = False 
+         
+        Call HideSheets 
+         
+        .ScreenUpdating = True 
+        .EnableCancelKey = xlInterrupt 
+    End With 
+End Sub 
+ 
+Private Sub HideSheets() 
+     '
+    Dim Sheet As Object '< Includes worksheets and chartsheets
+     '
+    With Sheets("Prompt") 
+         '
+         'the hiding of the sheets constitutes a change that generates
+         'an automatic "Save?" prompt, so IF the book has already
+         'been saved prior to this point, the next line and the lines
+         'relating to .[A100] below bypass the "Save?" dialog...
+        If ThisWorkbook.Saved = True Then .[A100] = "Saved" 
+         '
+        .Visible = xlSheetVisible 
+         '
+        For Each Sheet In Sheets 
+            If Not Sheet.Name = "Prompt" Then 
+                Sheet.Visible = xlSheetVeryHidden 
+            End If 
+        Next 
+         '
+        If .[A100] = "Saved" Then 
+            .[A100].ClearContents 
+            ThisWorkbook.Save 
+        End If 
+         '
+        Set Sheet = Nothing 
+    End With 
+     '
+End Sub 
+ 
